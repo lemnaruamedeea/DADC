@@ -1,0 +1,276 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  color: #e8e8e8;
+}
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.upload-zone {
+  border: 2px dashed #475569;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  background: rgba(30, 41, 59, 0.5);
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.upload-zone input {
+  display: none;
+}
+
+.upload-zone label {
+  cursor: pointer;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.zoom-control label {
+  font-weight: 500;
+}
+
+.zoom-control input {
+  width: 120px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 1rem;
+}
+
+.zoom-control span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #475569;
+}
+
+.status {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.status.pending {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #facc15;
+}
+
+.status.ready {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.status.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.download-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.download-link:hover {
+  text-decoration: underline;
+}
+
+.error-msg {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.selected-file {
+  margin-top: 0.5rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  max-width: 640px;
+  margin: 0 auto;
+  border-bottom: 1px solid #334155;
+}
+
+.nav-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.nav-link:hover {
+  color: #e2e8f0;
+  background: rgba(51, 65, 85, 0.5);
+}
+
+.nav-link.active {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.snmp-page .subtitle {
+  margin-bottom: 1rem;
+}
+
+.snmp-loading {
+  color: #94a3b8;
+  margin: 1rem 0;
+}
+
+.snmp-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.snmp-last {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.snmp-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: rgba(30, 41, 59, 0.5);
+  margin-bottom: 1rem;
+}
+
+.snmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.snmp-table th,
+.snmp-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+}
+
+.snmp-table th {
+  background: rgba(51, 65, 85, 0.6);
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.snmp-table tbody tr:hover {
+  background: rgba(51, 65, 85, 0.3);
+}
+
+.snmp-table .snmp-node {
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.snmp-table .snmp-os {
+  color: #cbd5e1;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snmp-table .snmp-cpu,
+.snmp-table .snmp-ram {
+  font-variant-numeric: tabular-nums;
+}
+
+.snmp-empty {
+  color: #64748b;
+  text-align: center;
+  padding: 2rem !important;
+}
+
+.snmp-hint {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}

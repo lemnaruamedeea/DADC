@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="27.2.0">
+  <diagram name="BMP Zoom Architecture" id="arch-diagram">
+    <mxGraphModel dx="3630" dy="753" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="BMP Zoom – 6-Container Architecture (DAD)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="-110" y="20" width="480" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="End-to-End Data Flow (Upload → Process → Store → Notify)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#64748b;" parent="1" vertex="1">
+          <mxGeometry x="-110" y="48" width="480" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" value="Client Browser UI (React)&#xa;&#xa;• Upload BMP&#xa;• Select zoom % (Zoom In/Out, +/-)&#xa;• Status: PENDING / ready&#xa;• Download processed BMP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=8;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="-400" y="170" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="httpws" value="HTTP&#xa;Upload: POST /api/upload&#xa;Status: GET /api/job-status/:requestId&#xa;(polling → ready + downloadUrl)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="-400" y="300" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c01" value="c01 – Gateway + API (Javalin)&#xa;&#xa;HTTP:&#xa;• POST /api/upload (BMP + zoom %)&#xa;• GET /api/job-status/:requestId&#xa;• GET /job-complete (callback from c03)&#xa;&#xa;• Creates requestId, pictureId&#xa;• Publishes binary to JMS bmp.topic&#xa;• Updates job → ready + downloadUrl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry y="140" width="240" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="notif" value="Completion notification&#xa;c03 → GET c01/job-complete?requestId&amp;downloadUrl&#xa;→ c01 sets job ready + downloadUrl&#xa;→ Frontend (poll) shows link to c06" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry y="550" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c02" value="c02 – Apache TomEE 10 + ActiveMQ&#xa;JMS Broker&#xa;&#xa;Topic: bmp.topic&#xa;Topic: job.done.topic&#xa;Port: 61616/TCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=8;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="430" y="170" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="jmstopic" value="JMS Topic: bmp.topic&#xa;Producer: c01 (binary BMP + params)&#xa;Consumer: c03 MDB (NonDurable sub)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="430" y="300" width="200" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c03" value="c03 – Jakarta EE (TomEE), MDB: BmpTopicMDB&#xa;&#xa;• Consumes bmp.topic (binary + requestId, zoom%, pictureId)&#xa;• RMI → c04.zoom(bmp, %) and c05.zoom(bmp, %)&#xa;• Zoom pics united (result from c04)&#xa;• POST /api/bmp → c06 (store BLOB)&#xa;• GET c01/job-complete (callback)&#xa;• Publish DONE → job.done.topic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=8;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="-20" y="370" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="c04" value="c04 – RMI Server (TomEE 10)&#xa;ZoomService&#xa;Input: BMP bytes + zoom %&#xa;Output: zoomed BMP&#xa;Port: 1099/TCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;spacingLeft=8;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="790" y="355" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="c05" value="c05 – RMI Server (TomEE 10)&#xa;ZoomService&#xa;Input: BMP bytes + zoom %&#xa;Output: zoomed BMP&#xa;Port: 1099/TCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;spacingLeft=8;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="790" y="470" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rmifan" value="RMI fan-out&#xa;c03 → c04 + c05 (ZoomService.zoom)&#xa;Port 1099/TCP&#xa;Zoom pics united → one result" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="790" y="605" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c06" value="c06 – Storage Service (Node.js Express)&#xa;&#xa;REST:&#xa;• POST /api/bmp (store BMP BLOB, from c03)&#xa;• GET /api/bmp/:id (download image)&#xa;• GET /api/snmp (SNMP values display)&#xa;• POST /api/snmp (ingest)&#xa;Port: 3000/TCP&#xa;Stores BMP in MySQL; SNMP in MongoDB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;spacingLeft=8;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="-360" y="650" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="mysql" value="MySQL (inside c06)&#xa;Table: pictures&#xa;id (PK), request_id, zoom_percent,&#xa;created_at, data (LONGBLOB)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#fff9e6;strokeColor=#d79b00;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="490" y="590" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="mongo" value="MongoDB (inside c06)&#xa;Collection: snmp_values&#xa;node, osName, cpuUsage, ramUsage,&#xa;timestamp (from all nodes)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#e8f5e9;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="490" y="750" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="restdb" value="REST + DB&#xa;c03 POST /api/bmp → c06 (BMP bytes)&#xa;c06 → MySQL (pictures), returns downloadUrl&#xa;c06 SNMP collector → MongoDB (snmp_values)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;align=left;spacingLeft=6;" parent="1" vertex="1">
+          <mxGeometry x="-360" y="820" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="frontend" target="c01" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a1l" value="POST /api/upload (BMP + zoom %)" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a1" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="c01" target="c02" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2l" value="JMS Publish (binary to bmp.topic)" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a2" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="c02" target="c03" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="245" />
+              <mxPoint x="350" y="405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3l" value="MDB consumes bmp.topic" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a3" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a4a" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="c03" target="c04" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4al" value="RMI ZoomService" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a4a" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a4b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="c03" target="c05" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4bl" value="RMI ZoomService" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a4b" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="c03" target="c06" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5l" value="POST /api/bmp (BLOB)" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a5" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="c03" target="c01" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="360" />
+              <mxPoint x="120" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a6l" value="GET /job-complete?requestId&amp;downloadUrl" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a6" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="c01" target="frontend" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a7l" value="Poll GET /api/job-status → ready + downloadUrl" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a7" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="frontend" target="c06" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-440" y="220" />
+              <mxPoint x="-440" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8l" value="Download GET /api/bmp/:id" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;" parent="a8" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="c06" target="mysql" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="685" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="c06" target="mongo" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="755" />
+              <mxPoint x="430" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

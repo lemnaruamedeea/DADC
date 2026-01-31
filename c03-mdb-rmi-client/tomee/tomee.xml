@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomee>
+  <Resource id="DadJmsRA" type="ActiveMQResourceAdapter">
+    brokerXmlConfig =
+    ServerUrl = failover:(tcp://c02:61616)?initialReconnectDelay=1000&amp;maxReconnectDelay=30000&amp;useExponentialBackOff=true
+    startupTimeout = 60000
+  </Resource>
+
+  <Container id="MyMdbContainer" type="MESSAGE">
+    ResourceAdapter = DadJmsRA
+  </Container>
+
+  <Resource id="jms/InboundConnectionFactory" type="jakarta.jms.ConnectionFactory">
+    ResourceAdapter = DadJmsRA
+  </Resource>
+
+  <Resource id="jms/bmpTopic" type="jakarta.jms.Topic">
+    PhysicalName = bmp.topic
+  </Resource>
+
+  <Resource id="jms/jobDoneTopic" type="jakarta.jms.Topic">
+    PhysicalName = job.done.topic
+  </Resource>
+
+  <Resource id="jms/jobDoneQueue" type="jakarta.jms.Queue">
+    PhysicalName = job.done.queue
+  </Resource>
+</tomee>

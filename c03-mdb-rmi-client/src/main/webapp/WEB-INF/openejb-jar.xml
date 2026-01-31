@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://www.openejb.org/ns/openejb-jar/1.1">
+  <ejb-deployment ejb-name="BmpTopicMDB" deployment-id="BmpTopicMDB" container-id="MyMdbContainer" />
+</openejb-jar>
